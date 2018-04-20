@@ -1,0 +1,25 @@
+.data{
+    background-color: rgb(235, 238, 238);
+    color: rgb(66, 62, 62);
+    padding: 10px;
+}
+
+.table.table.table-hover th:hover 
+    {cursor: pointer;}
+
+.table {
+    color: #333;
+    background-color: rgba(255,255,255,.5);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    list-style: none;
+
+    transition: background-color .2s ease-out;
+}
+
+.data :hover{
+    background-color: rgb(178, 233, 250);
+    cursor: pointer;
+}
+

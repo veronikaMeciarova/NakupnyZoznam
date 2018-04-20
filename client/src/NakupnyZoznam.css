@@ -1,0 +1,44 @@
+.zoznamMain .header input {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #FFF;
+    width: 165px;
+  }
+  .zoznamMain .header button {
+    padding: 10px;
+    font-size: 16px;
+    background-color: rgb(97, 152, 235);
+    color: #FFF;
+    border: 2px solid rgb(97, 152, 235);
+  }
+  .zoznamMain .header button:hover {
+    background-color: #003399;
+    border: 2px solid #003399;
+    cursor: pointer;
+  }
+  .zoznamMain .zoznamPoloziek {
+    list-style: none;
+    padding-left: 0;
+    width: 250px;
+  } 
+  .zoznamMain .zoznamPoloziek li {
+    color: #333;
+    background-color: rgba(255,255,255,.5);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    list-style: none;
+
+    transition: background-color .2s ease-out;
+  }
+
+  .zoznamMain .zoznamPoloziek li:hover {
+    background-color: rgb(178, 233, 250);
+    cursor: pointer;
+  }
+
+  ul.zoznamPoloziek {
+    padding: 0;
+  }
+
+ 

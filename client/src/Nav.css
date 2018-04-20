@@ -1,0 +1,29 @@
+.navBar {
+    top:0;
+    left:0;
+    list-style-type: none;
+    overflow: hidden;
+    background-color: rgba(51, 51, 51, 1);
+    position:fixed;
+    width:100%;
+    padding-bottom: 10px;
+}
+
+.navItem{
+    top:0;
+    float: left;
+    list-style-type: none;
+    padding: 10px;
+}
+
+.navItem a {
+    display: block;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    
+}
+
+.navItem:hover {
+    background-color: rgb(85, 61, 61);
+}

@@ -1,0 +1,14 @@
+body {
+  background-color: rgb(234, 248, 246);
+  font-family: sans-serif;
+}
+#container {
+  width: 100%;
+  margin-top: 100px;
+  display: flex;
+  justify-content: center;
+}
+
+#nav{
+  width: 100%;
+}

@@ -1,22 +1,23 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
 import Zoznam from "./NakupnyZoznam"
 import Navigacia from "./Nav"
 import Data from "./Data"
 import Databaza from "./Databaza"
+import Polozky from "./Polozky"
+import Nakup from "./nakup"
   
+this.currentUserName = "veronika"
+
+
 ReactDOM.render(       
     <div>
-        <Navigacia/>
+        <Navigacia user={this.currentUserName} />
     </div>,
     document.querySelector("#nav")
 );  
 
 ReactDOM.render(       
-    <div>
-        <Zoznam/>
-        <Databaza />
-    </div>,
-    document.querySelector("#container")
+        <Nakup user={this.currentUserName}/>,
+    document.querySelector("#obsah")
 );

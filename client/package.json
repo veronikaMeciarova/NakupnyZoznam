@@ -4,12 +4,17 @@
   "private": true,
   "proxy": "http://localhost:5000/",
   "dependencies": {
+    "body-parser": "^1.18.2",
+    "moment": "^2.22.1",
     "react": "^16.3.2",
     "react-bootstrap": "^0.32.1",
     "react-bootstrap-table": "^4.3.1",
+    "react-datepicker": "^1.4.1",
     "react-dom": "^16.3.2",
     "react-flip-move": "^3.0.1",
-    "react-scripts": "1.1.4"
+    "react-scripts": "1.1.4",
+    "react-validation": "^3.0.7",
+    "tiny-picker": "^2.0.4"
   },
   "scripts": {
     "start": "react-scripts start",

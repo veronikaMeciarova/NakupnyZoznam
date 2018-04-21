@@ -1,69 +1,95 @@
 import React, { Component } from "react";
+import Form from 'react-validation/build/form';
+import Input from 'react-validation/build/input';
+import Select from 'react-validation/build/select';
 import Polozky from "./Polozky"
-import "./NakupnyZoznam.css"
+import PropTypes from 'prop-types';
 
 class NakupnyZoznam extends Component {
     constructor(props) {
         super(props);
+        this.user = this.props.user;
         this.state = {
-            items: [] //nazvy tabuliek nakupnych zoznamov
-        };
+            skupiny: [],
+        }
+        this.getSkupiny();
         this.addItem = this.addItem.bind(this);
-        this.deleteItem = this.deleteItem.bind(this);
-        this.change = this.change.bind(this);
+    }
+
+    getSkupiny() {
+        var self = this;
+        var data = {
+            name: this.user,
+        }
+        fetch('/groups', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data),
+        }).then(function(response) {
+            if (response.status >= 400) {
+                throw new Error("Bad response from server");
+            }
+            return response.json();
+        }).then(function(data) {
+            self.setState({
+                skupiny: data
+            });
+        }).catch(err => {
+            console.log('caught it!',err);
+        })
     }
 
     addItem(e) {
-        if (this._inputElement.value !== "") {
-          var newItem = {
-            text: this._inputElement.value,
-            key: Date.now(),
-            open: false
-          };
-       
-          this.setState((prevState) => {
-            return { 
-              items: prevState.items.concat(newItem) 
-            };
-          });
-         
-          this._inputElement.value = "";
+        var zoznamNazov = this._inputElement.value;
+        var skupinaNazov = document.getElementById("skupina").value;
+        if (zoznamNazov !== "" && skupinaNazov !== "none") {
+            var data = {zoznam: zoznamNazov,
+                        skupina: skupinaNazov
+                        };
+            fetch("/newZoznam", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).then(function(response) {
+                if (response.status >= 400) {
+                  throw new Error("Bad response from server");
+                }
+                return response.json();
+            }).then(function(data) {
+                console.log("odpoved: ", data);  
+                if(data == "success"){
+                   this.setState({msg: "Thanks for registering"});  
+                }
+            }).catch(function(err) {
+                console.log(err)
+            });
+           this._inputElement.value = "";
         }
-           
+        this.update();
         e.preventDefault();
-    }
-
-    deleteItem(key) {
-        var filteredItems = this.state.items.filter(function (item) {
-          return (item.key !== key);
-        });
        
-        this.setState({
-          items: filteredItems
-        });
     }
 
-    change(changeItem, opn) {
-        changeItem.open = opn;
-        this.setState({
-          });
+    update() {
+        this.props.onUpdate();
     }
 
     render() {
         return (
-        <div className="zoznamMain">
-            <div className="header">
+            <div className="inputBlock">
                 <form onSubmit={this.addItem}>
-                    <input ref={(a) => this._inputElement = a}
-                        placeholder="Nová položka">
+                    <input  ref={(a) => this._inputElement = a}
+                        placeholder="Názov zoznamu">
                     </input>
-                    <button type="submit">+</button>
+                    <select id='skupina'>
+                        <option disabled selected value="none">Skupina</option>
+                        {this.state.skupiny.map(sk =>
+                            <option value={sk.nazov_skupina}>{sk.nazov_skupina}</option>
+                        )}
+                    </select>
+                    <button class="btn" type="submit">Pridaj zoznam</button>
                 </form>
             </div>
-            <Polozky entries={this.state.items}
-                    delete={this.deleteItem}
-                    change={this.change}/>
-        </div>
         );
     }
 }

@@ -1,19 +1,24 @@
 import React, { Component } from "react";
-import Tabulka from "./Tabulka.js"
+import Zoznam from "./NakupnyZoznam"
+import Polozky from "./Polozky"
 import FlipMove from "react-flip-move";
+import Tabulka from "./Tabulka.js"
 import {BootstrapTable, 
     TableHeaderColumn} from 'react-bootstrap-table';
 import Data from "./Data"
+
  
-class Polozky extends Component {
+class Nakup extends Component {
     constructor(props) {
         super(props);
-        this.user = this.props.user;
         this.state = {
-            zoznamy: [],
+            zoznamy: ["ahoj"],
             open: []
         }
         this.getZoznamy();
+        this.currentUserName = this.props.user;
+        this.dajZoznam = this.getZoznamy.bind(this);
+        this.change = this.change.bind(this);
         this.createTasks = this.createTasks.bind(this);
     }
 
@@ -25,8 +30,9 @@ class Polozky extends Component {
         var self = this;
         console.log("zoznamy");
         var data = {
-            name: this.user,
+            name: "veronika",
         }
+        console.log("meno", self.currentUserName)
         fetch('/lists', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -46,6 +52,8 @@ class Polozky extends Component {
     }
 
     change(item) {
+        console.log("change", item);
+        console.log(this.state);
         var isOpen = this.state.open.indexOf(item.id);
         if (isOpen === -1) {
             var newState = this.state.open.concat(item.id);
@@ -70,29 +78,38 @@ class Polozky extends Component {
     createTasks(item) {
         var isOpen = this.state.open.indexOf(item.id);
         if (isOpen === -1) {
-            return (<li onClick={() => this.change(item)} key={item.id}>{item.nazov}</li>)
+            return (<li class="headerTabulka" onClick={() => this.change(item)} key={item.id}>{item.nazov}</li>)
         } else {
             return (
-                <div onClick={() => this.change(item)} key={item.id}>
-                    <Data nazov={item.nazov} />
+                <div key={item.id}>
+                    <Data item={item} change={this.change}/>
                 </div>
             )
         }
     }
- 
+
   render() {
     var listItems = this.state.zoznamy.map(this.createTasks);
- 
+
     return (
-      <ul className="zoznamPoloziek">
-             <div className="Polozka">
-                <FlipMove duration={250} easing="ease-out">
-                    {listItems}
-                </FlipMove>
-            </div>
-      </ul>
+        <div className="container text-center">
+        <div className="col-md-5 col-sm-12">
+            <div className="bigcart"></div> 
+            <Zoznam user={this.currentUserName} onUpdate={this.dajZoznam}/>	
+		</div>
+        
+        <div className="col-md-7 col-sm-12 text-left">
+            <ul className="zoznamPoloziek">
+                <div className="Polozka">
+                    <FlipMove duration={250} easing="ease-out">
+                        {listItems}
+                    </FlipMove>
+                </div>
+        </ul>
+        </div>
+    </div>
     );
   }
 };
  
-export default Polozky;
+export default Nakup;

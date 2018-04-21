@@ -1,20 +1,46 @@
 import React, { Component } from 'react';
 import Tabulka from './Tabulka'
-import "./Tabulka.css"
- 
-var data = [
-  {id: 1, name: 'Gob', value: '2'},
-  {id: 2, name: 'Buster', value: '5'},
-  {id: 3, name: 'George Michael', value: '4'}
-];
- 
  
 class Data extends Component {
+  constructor(props) {
+    super(props);
+    this.idZoznam = this.props.item.id;
+    this.state = {
+        polozky: [],
+    }
+    this.getPolozky();
+}
+
+getPolozky() {
+  var self = this;
+  var data = {
+      id: self.idZoznam, 
+  }
+  console.log(data);
+  fetch('/items', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data),
+  }).then(function(response) {
+      if (response.status >= 400) {
+          throw new Error("Bad response from server");
+      }
+      return response.json();
+  }).then(function(data) {
+      self.setState({
+          polozky: data
+      });
+  }).catch(err => {
+      console.log('caught it!',err);
+  })
+}
+
   render() {
+    console.log(this.state.polozky)
     return (
       <div className="data">
-        <p className="table-header">{this.props.nazov}</p>
-        <Tabulka data={data}/>
+        <p class="headerTabulka"  onClick={() => this.props.change(this.props.item)}> {this.props.item.nazov} ({this.props.item.nazov_skupina})</p>
+        <Tabulka data={this.state.polozky}/>
       </div>
     );
   }

@@ -27,7 +27,7 @@ export default class Databaza extends Component {
 
     render() {
         return (
-        <div className="container"> 
+        <div className="table"> 
             <div className="panel panel-default p50 uth-panel">
                 <table className="table table-hover">
                     <thead>

@@ -4,18 +4,29 @@ import Navbar from 'react-bootstrap/lib/Navbar';
 import Nav from 'react-bootstrap/lib/Nav';
 import NavItem from 'react-bootstrap/lib/NavItem';
 import Button from 'react-bootstrap/lib/Button';
-import "./Nav.css"
 
 class Navigacia extends React.Component {
 
   render() {
     return (
-      <Navbar brand="react-bootstrap" className="navBar">
-        <Nav bsStyle="pills" activeKey="1" onSelect= {this.handleSelect}>
-          <NavItem className="navItem" eventKey={1} href="#">Thing 1</NavItem>
-          <NavItem className="navItem" eventKey={2} href="#">Thing 2</NavItem>
-        </Nav>
-      </Navbar>
+      <div>
+            <nav className="navbar">
+              <div className="container">
+                <a className="navbar-brand" href="#">{this.props.user}</a>
+                <div className="navbar-right">
+                  <div className="container minicart"></div>
+                </div>
+              </div>
+            </nav>
+            
+            <div className="container-fluid breadcrumbBox text-center">
+            <ol className="breadcrumb">
+              <li><a href="#">Review</a></li>
+              <li className="active"><a href="#">Order</a></li>
+              <li><a href="#">Payment</a></li>
+            </ol>
+          </div> 
+    </div> 
     );
   }
 }

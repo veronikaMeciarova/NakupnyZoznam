@@ -48,9 +48,61 @@ app.post('/lists', function(req, res, next) {
 
 app.post('/items', function(req, res, next) {
   console.log(req.body.id);
-  var sql = 'SELECT * FROM polozka WHERE id_zoznam=?;'
+  var sql = 'SELECT p.nazov AS nazov, o.nazov AS obchod, p.meno_pouzivatel AS meno_pouzivatel, DATE_FORMAT(p.deadline,"%d.%m.%Y") AS deadline, p.poznamky AS poznamky, p.id AS id, p.id_zoznam AS id_zoznam, p.kupena AS kupena, p.platna AS platna FROM polozka p, obchod o WHERE id_zoznam=? AND o.id=p.obchod;'
   con.query(sql, [req.body.id], function (error, results, fields) {
       if(error) throw error;
+      console.log(results);
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/itemDelete', function(req, res, next) {
+  console.log(req.body.id);
+  var sql = 'DELETE FROM polozka WHERE id=?;'
+  con.query(sql, [req.body.id], function (error, results, fields) {
+      if(error) throw error;
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/deleteList', function(req, res, next) {
+  console.log(req.body.id);
+  var sql = 'DELETE FROM zoznam WHERE id=?;'
+  con.query(sql, [req.body.id], function (error, results, fields) {
+      if(error) throw error;
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/usersGroup', function(req, res, next) {
+  console.log(req.body.skupina);
+  var sql = 'SELECT meno_pouzivatel FROM prislusnost WHERE nazov_skupina=?;'
+  con.query(sql, [req.body.skupina], function (error, results, fields) {
+      if(error) throw error;
+      console.log(results);
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/addShop', function(req, res, next) {
+  var sql = 'INSERT INTO obchod(nazov, nazov_skupina) VALUES (?,?);'
+  con.query(sql, [req.body.obchod, req.body.skupina], function (error, results, fields) {
+      if(error) throw error;
+  });
+
+  var sql = 'SELECT id FROM obchod WHERE nazov=? AND nazov_skupina=?;'
+  con.query(sql, [req.body.obchod, req.body.skupina], function (error, results, fields) {
+      if(error) throw error;
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/shopsGroup', function(req, res, next) {
+  console.log(req.body.skupina);
+  var sql = 'SELECT nazov, id FROM obchod WHERE nazov_skupina=?;'
+  con.query(sql, [req.body.skupina], function (error, results, fields) {
+      if(error) throw error;
+      console.log(results);
       res.send(JSON.stringify(results));
   });
 });
@@ -65,7 +117,15 @@ app.post('/newZoznam', function(req, res, next) {
   });
 });
 
-
+app.post('/addItem', function(req, res, next) {
+  var a = req.body;
+  var sql = 'INSERT INTO polozka(nazov,id_zoznam,obchod,meno_pouzivatel,deadline,poznamky) values (?,?,?,?,?,?);'
+  con.query(sql, [a.nazov,a.id_zoznam,a.obchod,a.meno,a.deadline,a.poznamka], function (error, results, fields) {
+      if(error) throw error;
+      console.log("result", results);
+      res.send(JSON.stringify(results));
+  });
+});
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
 

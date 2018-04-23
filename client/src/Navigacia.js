@@ -6,6 +6,22 @@ import NavItem from 'react-bootstrap/lib/NavItem';
 import Button from 'react-bootstrap/lib/Button';
 
 class Navigacia extends React.Component {
+  constructor(props) {
+    super(props);
+    this.active = this.props.id;
+    console.log(this.active);
+    this.navigacia = [
+      {id:"1", link:"/nakup", nazov:"Nákup"},
+      {id:"2", link:"/", nazov:"Tvorba zoznamov"},
+      {id:"3", link:"/skupiny", nazov:"Skupiny"},]
+  }
+
+  createItem(item) {
+    if (item.id === this.active) 
+      return (<li className="active"><a href={item.link}>{item.nazov}</a></li>)
+    else
+      return  (<li><a href={item.link}>{item.nazov}</a></li>)
+  }
 
   render() {
     return (
@@ -21,9 +37,7 @@ class Navigacia extends React.Component {
             
             <div className="container-fluid breadcrumbBox text-center">
             <ol className="breadcrumb">
-              <li><a href="#">Review</a></li>
-              <li className="active"><a href="#">Order</a></li>
-              <li><a href="#">Payment</a></li>
+              {this.navigacia.map(n => this.createItem(n))}
             </ol>
           </div> 
     </div> 

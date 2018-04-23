@@ -2,13 +2,12 @@ import React, { Component } from "react";
 import Form from 'react-validation/build/form';
 import Input from 'react-validation/build/input';
 import Select from 'react-validation/build/select';
-import Polozky from "./Polozky"
 import PropTypes from 'prop-types';
 
-class NakupnyZoznam extends Component {
+class ZoznamInput extends Component {
     constructor(props) {
         super(props);
-        this.user = this.props.user;
+        this.currentUserName = this.props.currentUserName;
         this.state = {
             skupiny: [],
         }
@@ -19,7 +18,7 @@ class NakupnyZoznam extends Component {
     getSkupiny() {
         var self = this;
         var data = {
-            name: this.user,
+            name: self.currentUserName,
         }
         fetch('/groups', {
             method: 'POST',
@@ -40,6 +39,7 @@ class NakupnyZoznam extends Component {
     }
 
     addItem(e) {
+        var self = this;
         var zoznamNazov = this._inputElement.value;
         var skupinaNazov = document.getElementById("skupina").value;
         if (zoznamNazov !== "" && skupinaNazov !== "none") {
@@ -56,16 +56,13 @@ class NakupnyZoznam extends Component {
                 }
                 return response.json();
             }).then(function(data) {
-                console.log("odpoved: ", data);  
-                if(data == "success"){
-                   this.setState({msg: "Thanks for registering"});  
-                }
+                self.update();
             }).catch(function(err) {
                 console.log(err)
             });
            this._inputElement.value = "";
         }
-        this.update();
+        
         e.preventDefault();
        
     }
@@ -87,14 +84,14 @@ class NakupnyZoznam extends Component {
                             <option value={sk.nazov_skupina}>{sk.nazov_skupina}</option>
                         )}
                     </select>
-                    <button class="btn" type="submit">Pridaj zoznam</button>
+                    <button className="btn" type="submit">Pridaj zoznam</button>
                 </form>
             </div>
         );
     }
 }
  
-export default NakupnyZoznam;
+export default ZoznamInput;
 
 
 

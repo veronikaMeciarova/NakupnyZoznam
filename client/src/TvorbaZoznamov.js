@@ -1,25 +1,24 @@
 import React, { Component } from "react";
-import Zoznam from "./NakupnyZoznam"
-import Polozky from "./Polozky"
 import FlipMove from "react-flip-move";
-import Tabulka from "./Tabulka.js"
 import {BootstrapTable, 
     TableHeaderColumn} from 'react-bootstrap-table';
-import Data from "./Data"
-
+import ZoznamOutput from "./ZoznamOutput"
+import ZoznamInput from "./ZoznamInput"
  
-class Nakup extends Component {
+class TvorbaZoznamov extends Component {
     constructor(props) {
         super(props);
         this.state = {
             zoznamy: ["ahoj"],
             open: []
         }
+        this.currentUserName = this.props.currentUserName;
         this.getZoznamy();
-        this.currentUserName = this.props.user;
         this.dajZoznam = this.getZoznamy.bind(this);
         this.change = this.change.bind(this);
+        this.delete = this.delete.bind(this);
         this.createTasks = this.createTasks.bind(this);
+        this.getTimeStamp = this.getTimeStamp.bind(this);
     }
 
     setClose(item) {
@@ -28,11 +27,9 @@ class Nakup extends Component {
 
     getZoznamy() {
         var self = this;
-        console.log("zoznamy");
         var data = {
-            name: "veronika",
+            name: self.currentUserName,
         }
-        console.log("meno", self.currentUserName)
         fetch('/lists', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -52,8 +49,6 @@ class Nakup extends Component {
     }
 
     change(item) {
-        console.log("change", item);
-        console.log(this.state);
         var isOpen = this.state.open.indexOf(item.id);
         if (isOpen === -1) {
             var newState = this.state.open.concat(item.id);
@@ -75,14 +70,38 @@ class Nakup extends Component {
         }
     }
 
+    delete(item) {
+        console.log("vymazavam", item);
+        var self = this;
+        var data = {
+            id: item.id,
+        }
+        fetch('/deleteList', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data),
+        }).then(function(response) {
+            if (response.status >= 400) {
+                throw new Error("Bad response from server");
+            }
+            return response.json();
+        }).then(function(data) {
+            self.getZoznamy();
+        }).catch(err => {
+            console.log('caught it!',err);
+        })
+    }
+
     createTasks(item) {
         var isOpen = this.state.open.indexOf(item.id);
         if (isOpen === -1) {
-            return (<li class="headerTabulka" onClick={() => this.change(item)} key={item.id}>{item.nazov}</li>)
+            return (<li key={item.id} className="headerTabulka" onClick={() => this.change(item)}>
+                    {item.nazov}
+            </li>)
         } else {
             return (
                 <div key={item.id}>
-                    <Data item={item} change={this.change}/>
+                    <ZoznamOutput item={item} change={this.change} delete={() => this.delete(item)}/>
                 </div>
             )
         }
@@ -95,7 +114,7 @@ class Nakup extends Component {
         <div className="container text-center">
         <div className="col-md-5 col-sm-12">
             <div className="bigcart"></div> 
-            <Zoznam user={this.currentUserName} onUpdate={this.dajZoznam}/>	
+            <ZoznamInput currentUserName={this.currentUserName} onUpdate={this.dajZoznam}/>	
 		</div>
         
         <div className="col-md-7 col-sm-12 text-left">
@@ -112,4 +131,4 @@ class Nakup extends Component {
   }
 };
  
-export default Nakup;
+export default TvorbaZoznamov;

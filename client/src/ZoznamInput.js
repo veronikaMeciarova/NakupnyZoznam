@@ -81,7 +81,7 @@ class ZoznamInput extends Component {
                     <select id='skupina'>
                         <option disabled selected value="none">Skupina</option>
                         {this.state.skupiny.map(sk =>
-                            <option value={sk.nazov_skupina}>{sk.nazov_skupina}</option>
+                            <option value={sk.nazov}>{sk.nazov}</option>
                         )}
                     </select>
                     <button className="btn" type="submit">Pridaj zoznam</button>

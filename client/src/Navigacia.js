@@ -12,7 +12,7 @@ class Navigacia extends React.Component {
     console.log(this.active);
     this.navigacia = [
       {id:"1", link:"/nakup", nazov:"Nákup"},
-      {id:"2", link:"/", nazov:"Tvorba zoznamov"},
+      {id:"2", link:"/tvorbaZoznamov", nazov:"Tvorba zoznamov"},
       {id:"3", link:"/skupiny", nazov:"Skupiny"},]
   }
 

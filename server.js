@@ -1,4 +1,6 @@
 const express = require('express');
+const rand = require('csprng');
+const crypto = require('crypto');
 
 const app = express();
 var router = express.Router();
@@ -29,8 +31,7 @@ con.query("SELECT * FROM pouzivatel", function (error, results, fields) {
 });
 
 app.post('/groups', function(req, res, next) {
-  console.log(req.body.name);
-  var sql = 'SELECT nazov_skupina FROM prislusnost WHERE meno_pouzivatel=?;'
+  var sql = 'SELECT nazov_skupina AS nazov FROM prislusnost WHERE meno_pouzivatel=?;'
   con.query(sql, [req.body.name], function (error, results, fields) {
       if(error) throw error;
       res.send(JSON.stringify(results));
@@ -38,7 +39,6 @@ app.post('/groups', function(req, res, next) {
 });
 
 app.post('/lists', function(req, res, next) {
-  console.log(req.body.name);
   var sql = 'SELECT z.nazov AS nazov, z.id AS id, z.nazov_skupina AS nazov_skupina FROM zoznam z, prislusnost p WHERE p.meno_pouzivatel=? AND p.nazov_skupina = z.nazov_skupina;'
   con.query(sql, [req.body.name], function (error, results, fields) {
       if(error) throw error;
@@ -47,17 +47,14 @@ app.post('/lists', function(req, res, next) {
 });
 
 app.post('/items', function(req, res, next) {
-  console.log(req.body.id);
   var sql = 'SELECT p.nazov AS nazov, o.nazov AS obchod, p.meno_pouzivatel AS meno_pouzivatel, DATE_FORMAT(p.deadline,"%d.%m.%Y") AS deadline, p.poznamky AS poznamky, p.id AS id, p.id_zoznam AS id_zoznam, p.kupena AS kupena, p.platna AS platna FROM polozka p, obchod o WHERE id_zoznam=? AND o.id=p.obchod;'
   con.query(sql, [req.body.id], function (error, results, fields) {
       if(error) throw error;
-      console.log(results);
       res.send(JSON.stringify(results));
   });
 });
 
 app.post('/itemDelete', function(req, res, next) {
-  console.log(req.body.id);
   var sql = 'DELETE FROM polozka WHERE id=?;'
   con.query(sql, [req.body.id], function (error, results, fields) {
       if(error) throw error;
@@ -66,7 +63,6 @@ app.post('/itemDelete', function(req, res, next) {
 });
 
 app.post('/deleteList', function(req, res, next) {
-  console.log(req.body.id);
   var sql = 'DELETE FROM zoznam WHERE id=?;'
   con.query(sql, [req.body.id], function (error, results, fields) {
       if(error) throw error;
@@ -75,11 +71,9 @@ app.post('/deleteList', function(req, res, next) {
 });
 
 app.post('/usersGroup', function(req, res, next) {
-  console.log(req.body.skupina);
   var sql = 'SELECT meno_pouzivatel FROM prislusnost WHERE nazov_skupina=?;'
   con.query(sql, [req.body.skupina], function (error, results, fields) {
       if(error) throw error;
-      console.log(results);
       res.send(JSON.stringify(results));
   });
 });
@@ -97,12 +91,53 @@ app.post('/addShop', function(req, res, next) {
   });
 });
 
+app.post('/registr', function(req, res, next) {
+  var sql = 'SELECT * FROM pouzivatel WHERE meno=?;'
+  con.query(sql, [req.body.meno], function (error, results, fields) {
+    if(error) throw error; 
+    var self = this;
+    var pocet = results.length;
+      if (pocet === 0) {
+        var sol = rand(160, 36);
+        var hesloASol = req.body.heslo + sol;
+        var hash = crypto.createHash('sha256').update(hesloASol).digest('base64');
+        var sql = 'INSERT INTO pouzivatel(meno, heslo, sol) VALUES (?,?,?);'
+        con.query(sql, [req.body.meno, hash, sol], function (error, results, fields) {
+          if(error) throw error;
+          res.send(JSON.stringify(results));
+        });
+      } else {
+        res.send(JSON.stringify({msg: "uzExistuje"}));
+      }
+  });
+});
+
+app.post('/login', function(req, res, next) {
+  var sql = 'SELECT * FROM pouzivatel WHERE meno=?;'
+  con.query(sql, [req.body.meno], function (error, results, fields) {
+    if(error) throw error; 
+    var self = this;
+    var pocet = results.length;
+      if (pocet === 0) {
+        res.send(JSON.stringify({msg: "neexistuje"}));
+      } else {
+        var sol = results[0].sol;
+        var hesloASol = req.body.heslo + sol;
+        var hash = crypto.createHash('sha256').update(hesloASol).digest('base64');
+        if (hash === results[0].heslo) {
+          res.send(JSON.stringify({msg: "ok"}));
+        } else {
+          res.send(JSON.stringify({msg: "zleHeslo"}));
+        }
+      }
+  });
+});
+
 app.post('/shopsGroup', function(req, res, next) {
   console.log(req.body.skupina);
   var sql = 'SELECT nazov, id FROM obchod WHERE nazov_skupina=?;'
   con.query(sql, [req.body.skupina], function (error, results, fields) {
       if(error) throw error;
-      console.log(results);
       res.send(JSON.stringify(results));
   });
 });
@@ -112,7 +147,6 @@ app.post('/newZoznam', function(req, res, next) {
   var sql = 'insert into zoznam(nazov,nazov_skupina) values (?,?);'
   con.query(sql, [req.body.zoznam, req.body.skupina], function (error, results, fields) {
       if(error) throw error;
-      console.log("result", results);
       res.send(JSON.stringify(results));
   });
 });
@@ -122,7 +156,34 @@ app.post('/addItem', function(req, res, next) {
   var sql = 'INSERT INTO polozka(nazov,id_zoznam,obchod,meno_pouzivatel,deadline,poznamky) values (?,?,?,?,?,?);'
   con.query(sql, [a.nazov,a.id_zoznam,a.obchod,a.meno,a.deadline,a.poznamka], function (error, results, fields) {
       if(error) throw error;
-      console.log("result", results);
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/buyItems', function(req, res, next) {
+  var sql = 'SELECT pol.id AS id, z.nazov_skupina AS skupina, z.nazov AS zoznam, pol.nazov AS nazov, pol.kupena AS kupena, pol.obchod AS obchod, pol.meno_pouzivatel AS meno_pouzivatel, DATE_FORMAT(pol.deadline,"%d.%m.%Y") AS deadline, pol.platna AS platna, pol.poznamky AS poznamky FROM polozka pol, prislusnost pr, zoznam z WHERE pr.meno_pouzivatel=? AND pr.nazov_skupina=z.nazov_skupina AND z.id=pol.id_zoznam;'
+  con.query(sql, [req.body.meno], function (error, results, fields) {
+      if(error) throw error;
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/setItemAsBought', function(req, res, next) {
+  if (req.body.kupena === "kupena") {
+      var sql = 'UPDATE polozka SET kupena="nekupena" WHERE id=?'
+      con.query(sql, [req.body.id], function (error, results, fields) {
+          if(error) throw error;
+      });
+  } else {
+      var sql = 'UPDATE polozka SET kupena="kupena" WHERE id=?'
+      con.query(sql, [req.body.id], function (error, results, fields) {
+          if(error) throw error;
+      });
+    }
+
+  var sql = 'SELECT pol.id AS id, z.nazov_skupina AS skupina, z.nazov AS zoznam, pol.nazov AS nazov, pol.kupena AS kupena, pol.obchod AS obchod, pol.meno_pouzivatel AS meno_pouzivatel, DATE_FORMAT(pol.deadline,"%d.%m.%Y") AS deadline, pol.platna AS platna, pol.poznamky AS poznamky FROM polozka pol, prislusnost pr, zoznam z WHERE pr.meno_pouzivatel=? AND pr.nazov_skupina=z.nazov_skupina AND z.id=pol.id_zoznam;'
+  con.query(sql, [req.body.meno], function (error, results, fields) {
+      if(error) throw error;
       res.send(JSON.stringify(results));
   });
 });

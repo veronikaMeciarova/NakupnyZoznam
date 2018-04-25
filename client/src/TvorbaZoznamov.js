@@ -13,12 +13,12 @@ class TvorbaZoznamov extends Component {
             open: []
         }
         this.currentUserName = this.props.currentUserName;
+        console.log("meno", this.currentUserName)
         this.getZoznamy();
         this.dajZoznam = this.getZoznamy.bind(this);
         this.change = this.change.bind(this);
         this.delete = this.delete.bind(this);
         this.createTasks = this.createTasks.bind(this);
-        this.getTimeStamp = this.getTimeStamp.bind(this);
     }
 
     setClose(item) {

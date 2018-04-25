@@ -7,8 +7,13 @@
     "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
   },
   "dependencies": {
+    "crypto": "^1.0.1",
+    "csprng": "^0.1.2",
     "express": "^4.16.3",
-    "mysql": "^2.15.0"
+    "mysql": "^2.15.0",
+    "react-native-sha256": "^1.1.1",
+    "sha256": "^0.2.0",
+    "string-hash": "^1.1.3"
   },
   "devDependencies": {
     "concurrently": "^3.5.0"

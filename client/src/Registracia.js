@@ -4,7 +4,6 @@ import Notifications, {notify} from 'react-notify-toast';
 class Registracia extends Component {
     constructor(props) {
         super(props);
-        this.props.setUserName("poslalTotoMeno");
         this.registrate = this.registrate.bind(this);
     }
 

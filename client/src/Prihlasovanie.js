@@ -4,7 +4,6 @@ import Notifications, {notify} from 'react-notify-toast';
 class Prihlasovanie extends Component {
     constructor(props) {
         super(props);
-        this.props.setUserName("poslalTotoMeno");
         this.login = this.login.bind(this);
         this.registrate = this.registrate.bind(this);
     }

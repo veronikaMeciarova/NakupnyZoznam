@@ -8,10 +8,6 @@ const port = process.env.PORT || 5000;
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
-// app.get('/api/hello', (req, res) => {
-//   res.send({ express: 'AHOJ' });
-// });
-
 var mysql = require('mysql');
 
 var con = mysql.createConnection({
@@ -75,6 +71,28 @@ app.post('/usersGroup', function(req, res, next) {
   con.query(sql, [req.body.skupina], function (error, results, fields) {
       if(error) throw error;
       res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/chPasswd', function(req, res, next) {
+  var sql = 'SELECT heslo, sol FROM pouzivatel WHERE meno=?;'
+  con.query(sql, [req.body.meno], function (error, results, fields) {
+      if(error) throw error;
+      var staraSol = results[0].sol;
+      var stareHesloASol = req.body.stare + staraSol;
+      var staryHash = crypto.createHash('sha256').update(stareHesloASol).digest('base64');
+      if (staryHash === results[0].heslo) {
+        var novaSol = rand(160, 36);
+        var noveHesloASol = req.body.nove + novaSol;
+        var novyHash = crypto.createHash('sha256').update(noveHesloASol).digest('base64');
+        var sql = 'UPDATE pouzivatel SET heslo=?, sol=? WHERE meno=?;'
+        con.query(sql, [novyHash, novaSol, req.body.meno], function (error, results, fields) {
+            if(error) throw error;
+            res.send(JSON.stringify(results));
+        });
+      } else {
+        res.send(JSON.stringify({msg: "zleHeslo"}));
+      }     
   });
 });
 
@@ -161,7 +179,7 @@ app.post('/addItem', function(req, res, next) {
 });
 
 app.post('/buyItems', function(req, res, next) {
-  var sql = 'SELECT pol.id AS id, z.nazov_skupina AS skupina, z.nazov AS zoznam, pol.nazov AS nazov, pol.kupena AS kupena, pol.obchod AS obchod, pol.meno_pouzivatel AS meno_pouzivatel, DATE_FORMAT(pol.deadline,"%d.%m.%Y") AS deadline, pol.platna AS platna, pol.poznamky AS poznamky FROM polozka pol, prislusnost pr, zoznam z WHERE pr.meno_pouzivatel=? AND pr.nazov_skupina=z.nazov_skupina AND z.id=pol.id_zoznam;'
+  var sql = 'SELECT o.nazov AS obchod_nazov, pol.id AS id, z.nazov_skupina AS skupina, z.nazov AS zoznam, pol.nazov AS nazov, pol.kupena AS kupena, pol.obchod AS obchod, pol.meno_pouzivatel AS meno_pouzivatel, DATE_FORMAT(pol.deadline,"%d.%m.%Y") AS deadline, pol.platna AS platna, pol.poznamky AS poznamky FROM polozka pol, prislusnost pr, zoznam z, obchod o WHERE pr.meno_pouzivatel=? AND pr.nazov_skupina=z.nazov_skupina AND z.id=pol.id_zoznam AND o.id=pol.obchod;'
   con.query(sql, [req.body.meno], function (error, results, fields) {
       if(error) throw error;
       res.send(JSON.stringify(results));

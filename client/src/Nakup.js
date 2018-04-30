@@ -16,7 +16,8 @@ class TvorbaZoznamov extends Component {
             nonCheckedObchody: [],
             obchody: [],
             zoznamy: [],
-            skupiny: []
+            skupiny: [], 
+            obchod_nazov:[]
         }
         this.currentUserName = window.sessionStorage.getItem("meno");
 
@@ -99,14 +100,16 @@ class TvorbaZoznamov extends Component {
     getObchody() {
         var self = this;
         var pwd = [];
+        var nazvy = {}
         for (var i=0; i<self.state.zoznam.length; i++){
             var p = self.state.zoznam[i].obchod;           
             if (pwd.indexOf(p) === -1) {
                 var newArray = pwd.concat(p);
                 pwd = newArray;
+                nazvy[p] = self.state.zoznam[i].obchod_nazov;  
             }
         }
-        self.setState({obchody: pwd});
+        self.setState({obchody: pwd, obchod_nazov: nazvy});
     }
     
     kupit(item) {
@@ -139,17 +142,16 @@ class TvorbaZoznamov extends Component {
         var vykresli = true;
         if (item.platna !== "platna") { vykresli = false;}
         if (this.state.vsetky === false && item.meno_pouzivatel !== this.currentUserName) { vykresli = false;}
-        if (this.state.nonCheckedObchody.indexOf(item.obchod) > -1) { vykresli = false;}
+        if (this.state.nonCheckedObchody.indexOf(item.obchod.toString()) > -1) { vykresli = false;}
         if (this.state.nonCheckedSkupiny.indexOf(item.skupina) > -1) { vykresli = false;}
         if (this.state.nonCheckedZoznamy.indexOf(item.zoznam) > -1) { vykresli = false;}
-        console.log(item.kupena)
         if (vykresli) {
             if (item.kupena === "kupena") {
-                console.log("vykreslujem kupenu")
+
                 return (
                     <tr onClick={() => this.kupit(item)} id={item.id}>
                         <th><font color="lightgrey">{item.nazov}</font></th>
-                        <th><font color="lightgrey">{item.obchod}</font></th>
+                        <th><font color="lightgrey">{item.obchod_nazov}</font></th>
                         <th><font color="lightgrey">{item.meno_pouzivatel}</font></th>
                         <th><font color="lightgrey">{item.deadline}</font></th>
                         <th><font color="lightgrey">{item.poznamky}</font></th>
@@ -161,7 +163,7 @@ class TvorbaZoznamov extends Component {
                 return (
                 <tr onClick={() => this.kupit(item)} id={item.id}>
                     <th>{item.nazov}</th>
-                    <th>{item.obchod}</th>
+                    <th>{item.obchod_nazov}</th>
                     <th>{item.meno_pouzivatel}</th>
                     <th>{item.deadline}</th>
                     <th>{item.poznamky}</th>
@@ -223,7 +225,7 @@ class TvorbaZoznamov extends Component {
         var self = this;
         return (
             <div>
-            <input type="checkbox" value={item} checked={self.state.nonCheckedObchody.indexOf(item) === -1} onChange={self.setObchody}/>  {item}<br/>
+            <input type="checkbox" value={item} checked={self.state.nonCheckedObchody.indexOf(item) === -1} onChange={self.setObchody}/>  {self.state.obchod_nazov[item]}<br/>
             </div>
         )
       }

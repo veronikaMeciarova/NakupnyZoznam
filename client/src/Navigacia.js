@@ -15,6 +15,21 @@ class Navigacia extends React.Component {
       {id:"1", link:"/nakup", nazov:"Nákup"},
       {id:"2", link:"/tvorbaZoznamov", nazov:"Tvorba zoznamov"},
       {id:"3", link:"/skupiny", nazov:"Skupiny"},]
+    this.dropDownMenu = this.dropDownMenu.bind(this);
+
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropbtn')) {
+    
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
   }
 
   createItem(item) {
@@ -24,12 +39,24 @@ class Navigacia extends React.Component {
       return  (<li><a href={item.link}>{item.nazov}</a></li>)
   }
 
+  dropDownMenu() {
+    console.log("dropdown")
+    document.getElementById("myDropdown").classList.toggle("show");
+}
+
+
   render() {
     return (
       <div>
             <nav className="navbar">
               <div className="container">
-                <a className="navbar-brand" href="#">{this.user}</a>
+                <div class="dropdown">
+                    <p onClick={this.dropDownMenu} class="dropbtn">{this.user}▼</p>
+                    <div id="myDropdown" class="dropdown-content">
+                      <a href="/zmenaHesla">Zmena hesla</a>
+                      <a href="/">Odhlásenie</a>
+                    </div>
+                    </div>
                 <div className="navbar-right">
                   <div className="container minicart"></div>
                 </div>

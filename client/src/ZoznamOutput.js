@@ -26,6 +26,7 @@ class ZoznamOutput extends Component {
     this.addItem = this.addItem.bind(this);
     this.getShopsOfGroup = this.getShopsOfGroup.bind(this);
     this.getIdShop = this.getIdShop.bind(this);
+    this.setKto = this.setKto.bind(this);
 }
 
 getIdShop(callback) {
@@ -212,6 +213,12 @@ handleChange(date) {
     }
   }
 
+  setKto(event) {
+      var self = this;
+      self._kto = event.target;
+      console.log("kto", event.target.value)
+  }
+
   render() {
     var data = this.state.polozky.map(this.createTasks);
     return (
@@ -239,10 +246,10 @@ handleChange(date) {
                         )}
                     </datalist>
               </td>
-              <td>  <select id='usersGroup'>
+              <td>  <select id='usersGroup' onChange={this.setKto}>
                         <option disabled selected value="none">Kto</option>
                         {this.state.users.map(user =>
-                            <option value={user.meno_pouzivatel} ref={(a) => this._kto = a}>{user.meno_pouzivatel}</option>
+                            <option value={user.meno_pouzivatel}>{user.meno_pouzivatel}</option>
                         )}
                     </select>
                 </td>

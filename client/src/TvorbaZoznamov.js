@@ -9,21 +9,21 @@ class TvorbaZoznamov extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            zoznamy: ["ahoj"],
+            zoznamy: [],
             open: []
         }
-        this.currentUserName = this.props.currentUserName;
+        this.currentUserName = window.sessionStorage.getItem("meno");
         console.log("meno", this.currentUserName)
         this.getZoznamy();
         this.dajZoznam = this.getZoznamy.bind(this);
         this.change = this.change.bind(this);
         this.delete = this.delete.bind(this);
-        this.createTasks = this.createTasks.bind(this);
+        this.create = this.create.bind(this);
     }
 
-    setClose(item) {
-        item.open = false;
-    }
+    // setClose(item) {
+    //     item.open = false;
+    // }
 
     getZoznamy() {
         var self = this;
@@ -92,7 +92,7 @@ class TvorbaZoznamov extends Component {
         })
     }
 
-    createTasks(item) {
+    create(item) {
         var isOpen = this.state.open.indexOf(item.id);
         if (isOpen === -1) {
             return (<li key={item.id} className="headerTabulka" onClick={() => this.change(item)}>
@@ -108,7 +108,7 @@ class TvorbaZoznamov extends Component {
     }
 
   render() {
-    var listItems = this.state.zoznamy.map(this.createTasks);
+    var listItems = this.state.zoznamy.map(this.create);
 
     return (
         <div className="container text-center">

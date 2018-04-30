@@ -188,6 +188,46 @@ app.post('/setItemAsBought', function(req, res, next) {
   });
 });
 
+app.post('/allGroups', function(req, res, next) {
+  var sql = 'SELECT nazov, vlastnik FROM skupina;'
+  con.query(sql, [], function (error, results, fields) {
+      if(error) throw error;
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/addGroup', function(req, res, next) {
+  var sol = rand(160, 36);
+  var hesloASol = req.body.heslo + sol;
+  var hash = crypto.createHash('sha256').update(hesloASol).digest('base64');
+  var sql = 'INSERT INTO skupina(nazov, heslo, vlastnik, sol) VALUES (?,?,?,?);'
+  con.query(sql, [req.body.skupina, hash, req.body.meno, sol], function (error, results, fields) {
+      if(error) throw error;
+  });
+
+  var sql = 'INSERT INTO prislusnost(nazov_skupina, meno_pouzivatel) VALUES (?,?);'
+  con.query(sql, [req.body.skupina, req.body.meno], function (error, results, fields) {
+      if(error) throw error;
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/unjoinGroup', function(req, res, next) {
+  var sql = 'DELETE FROM prislusnost WHERE meno_pouzivatel=? AND nazov_skupina=?;'
+  con.query(sql, [req.body.meno, req.body.skupina], function (error, results, fields) {
+      if(error) throw error;
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/joinGroup', function(req, res, next) {
+  var sql = 'INSERT INTO prislusnost(meno_pouzivatel, nazov_skupina) VALUES (?,?);'
+  con.query(sql, [req.body.meno, req.body.skupina], function (error, results, fields) {
+      if(error) throw error;
+      res.send(JSON.stringify(results));
+  });
+});
+
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
-// con.end(); - kedy???
+// con.end();

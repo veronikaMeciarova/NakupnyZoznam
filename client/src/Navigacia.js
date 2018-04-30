@@ -10,6 +10,7 @@ class Navigacia extends React.Component {
     super(props);
     this.active = this.props.id;
     console.log(this.active);
+    this.user = window.sessionStorage.getItem("meno");
     this.navigacia = [
       {id:"1", link:"/nakup", nazov:"Nákup"},
       {id:"2", link:"/tvorbaZoznamov", nazov:"Tvorba zoznamov"},
@@ -28,7 +29,7 @@ class Navigacia extends React.Component {
       <div>
             <nav className="navbar">
               <div className="container">
-                <a className="navbar-brand" href="#">{this.props.user}</a>
+                <a className="navbar-brand" href="#">{this.user}</a>
                 <div className="navbar-right">
                   <div className="container minicart"></div>
                 </div>

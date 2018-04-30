@@ -18,11 +18,8 @@ class TvorbaZoznamov extends Component {
             zoznamy: [],
             skupiny: []
         }
-        this.currentUserName = this.props.currentUserName;
+        this.currentUserName = window.sessionStorage.getItem("meno");
 
-        // this.skupiny = [];
-        // this.zoznamy = [];
-        // this.obchody = []; 
         this.setSkupiny = this.setSkupiny.bind(this);
         this.setZoznamy = this.setZoznamy.bind(this);
         this.setObchody = this.setObchody.bind(this);
@@ -33,7 +30,6 @@ class TvorbaZoznamov extends Component {
         this.getSkupiny = this.getSkupiny.bind(this);
         this.getPolozky(this.getOstatne);
 
-        console.log("meno", this.currentUserName);
         this.createTasks = this.createTasks.bind(this);
         this.kupit = this.kupit.bind(this);
         this.setMy = this.setMy.bind(this);
@@ -68,7 +64,6 @@ class TvorbaZoznamov extends Component {
                 zoznam: data,
                 vsetky: true,
             });
-            console.log("zoznam:", self.state.zoznam)
             callback();
         }).catch(err => {
             console.log('caught it!',err);
@@ -277,8 +272,8 @@ class TvorbaZoznamov extends Component {
         <div className="col-md-5 col-sm-12">
             <div className="bigcart"></div> 
             <form onSubmit={this.handleSubmit}>
-                <label><input type="radio" value="moje" checked={this.state.vsetky === false} onChange={this.setMy}/>  len moje položky  </label><br/>
-                <label><input type="radio" value="vsetky" checked={this.state.vsetky === true} onChange={this.setMy}/>  všetky položky</label>
+                <label><input className="nakupSel" type="radio" value="moje" checked={this.state.vsetky === false} onChange={this.setMy}/>  len moje položky  </label><br/>
+                <label><input className="nakupSel" type="radio" value="vsetky" checked={this.state.vsetky === true} onChange={this.setMy}/>  všetky položky</label>
             </form>
             <h4>Skupiny:</h4>
             <form onSubmit={this.handleSubmit}>

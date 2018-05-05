@@ -3,6 +3,8 @@ import {BootstrapTable,
     TableHeaderColumn} from 'react-bootstrap-table';
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
+import Notifications, {notify} from 'react-notify-toast';
+
 
 import 'react-datepicker/dist/react-datepicker.css';
  
@@ -27,62 +29,77 @@ class ZoznamOutput extends Component {
     this.getShopsOfGroup = this.getShopsOfGroup.bind(this);
     this.getIdShop = this.getIdShop.bind(this);
     this.setKto = this.setKto.bind(this);
+    this.over = this.over.bind(this);
+}
+
+over(text) {
+    if (/^[a-zA-Z]/.test(text)) {
+        return true;
+        } else {
+            return false;
+        }
 }
 
 getIdShop(callback) {
     var self = this;
-    var obch = this.state.shops.filter(s => s.nazov === self._kde.value);
-    var obchodID;
-    if (obch.length === 0) {
-        fetch('/addShop', {
+    if (!this.over(self._kde.value)) {
+        notify.show("Názov obchodu nesmie byť prázdny alebo obsahovať špeciálny znak.", "error", 5000);
+    } else {
+        var obch = this.state.shops.filter(s => s.nazov === self._kde.value);
+        var obchodID;
+        if (obch.length === 0) {
+            fetch('/addShop', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({obchod: self._kde.value, skupina: self.zoznam.nazov_skupina}),
+            }).then(function(response) {
+                if (response.status >= 400) {
+                    throw new Error("Bad response from server");
+                }
+                return response.json();
+            }).then(function(data) {
+                self.getShopsOfGroup();
+                callback(data[0].id);
+            }).catch(err => {
+                console.log('caught it!',err);
+            })
+        } else {
+            console.log("stary obchod", obch[0].id);
+            callback (obch[0].id);
+        }
+    }
+}
+
+addItem(obchodId) {
+    var self = this;
+    if (this.over(self._co.value) && this.over(self._kto.value) && this.over(self._pozn.value)) {
+        var data = {
+            id_zoznam: self.zoznam.id, 
+            nazov: self._co.value,
+            obchod: obchodId,
+            meno: self._kto.value,
+            deadline: moment(self.state.startDate).format('YYYY/MM/DD'),
+            poznamka: self._pozn.value,
+            nazov_skupina: self.zoznam.nazov_skupina
+        }
+
+        fetch('/addItem', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({obchod: self._kde.value, skupina: self.zoznam.nazov_skupina}),
+            body: JSON.stringify(data),
         }).then(function(response) {
             if (response.status >= 400) {
                 throw new Error("Bad response from server");
             }
             return response.json();
         }).then(function(data) {
-            self.getShopsOfGroup();
-            console.log("novy obchod", data[0].id);
-            callback(data[0].id);
+            self.getPolozky();
         }).catch(err => {
             console.log('caught it!',err);
         })
     } else {
-        console.log("stary obchod", obch[0].id);
-        callback (obch[0].id);
+        notify.show("Vstup nesmie byť prázdny alebo obsahovať špeciálny znak.", "error", 5000);
     }
-}
-
-addItem(obchodId) {
-    var self = this;
-    var data = {
-        id_zoznam: self.zoznam.id, 
-        nazov: self._co.value,
-        obchod: obchodId,
-        meno: self._kto.value,
-        deadline: moment(self.state.startDate).format('YYYY/MM/DD'),
-        poznamka: self._pozn.value,
-        nazov_skupina: self.zoznam.nazov_skupina
-    }
-
-    console.log("toto posielam databaze:", data);
-    fetch('/addItem', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data),
-    }).then(function(response) {
-        if (response.status >= 400) {
-            throw new Error("Bad response from server");
-        }
-        return response.json();
-    }).then(function(data) {
-        self.getPolozky();
-    }).catch(err => {
-        console.log('caught it!',err);
-    })
 }
 
 getPolozky() {
@@ -90,7 +107,6 @@ getPolozky() {
   var data = {
       id: self.zoznam.id, 
   }
-  console.log(data);
   fetch('/items', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -176,7 +192,7 @@ handleChange(date) {
     });
   }
 
-  delete(item){ // povodne sa len malo zmenit na NEPLATNA!!!
+  delete(item){
     console.log("vymazavam", item.nazov)
     var self = this;
     var data = {
@@ -216,13 +232,13 @@ handleChange(date) {
   setKto(event) {
       var self = this;
       self._kto = event.target;
-      console.log("kto", event.target.value)
   }
 
   render() {
     var data = this.state.polozky.map(this.createTasks);
     return (
       <div className="data">
+        <Notifications/>
         <p className="headerTabulka"  onClick={() => this.props.change(this.props.item)}> {this.props.item.nazov} ({this.props.item.nazov_skupina})</p>
         <div class="table-responsive">
         <table class="table table-hover">

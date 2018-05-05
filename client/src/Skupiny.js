@@ -23,11 +23,23 @@ class Skupiny extends Component {
         this.addGroup = this.addGroup.bind(this);
         this.joinGroup = this.joinGroup.bind(this);
         this.change = this.change.bind(this);
-        this.delete = this.delete.bind(this);
+        this.opusti = this.opusti.bind(this);
         this.create = this.create.bind(this);
         this.getAllGroups = this.getAllGroups.bind(this);
         this.optionsSkupiny = this.optionsSkupiny.bind(this);
+        this.over = this.over.bind(this);
+        this.deleteGroup = this.deleteGroup.bind(this);
+        this.setOwner = this.setOwner.bind(this);
     }
+
+    over(text) {
+        if (/^[a-zA-Z]/.test(text)) {
+            return true;
+            } else {
+                return false;
+            }
+    }
+        
 
     getAllGroups() {
         var self = this;
@@ -55,80 +67,112 @@ class Skupiny extends Component {
 
     addGroup(e){
         var self =this;
-        if (self._novaSkupina.value.length < 1 && this._meno.value.length > 21) {
-            notify.show("Názov skupiny musí mať aspoň 1 znak a najviac 20", "error", 5000);
-        } else {
-            if (self.state.nazvy_skupin.indexOf(self._novaSkupina.value) === -1) {
-                if (this._heslo1.value.length < 5) {
-                    notify.show("Heslo musí mať aspoň 5 znakov", "error", 5000);       
-                } else { 
-                    if (self._heslo1.value === self._heslo2.value) {
-                        var self = this;
-                        var data = {
-                            skupina: self._novaSkupina.value,
-                            meno: self.currentUserName,
-                            heslo: self._heslo1.value
-                        }
-                        fetch('/addGroup', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify(data),
-                        }).then(function(response) {
-                            if (response.status >= 400) {
-                                throw new Error("Bad response from server");
+            if (this.over(self._novaSkupina.value) && this.over(self._heslo1.value)) {
+                if (self._novaSkupina.value.length < 1 && this._meno.value.length > 21) {
+                    notify.show("Názov skupiny musí mať aspoň 1 znak a najviac 20", "error", 5000);
+                } else {
+                    if (self.state.nazvy_skupin.indexOf(self._novaSkupina.value) === -1) {
+                        if (this._heslo1.value.length < 5) {
+                            notify.show("Heslo musí mať aspoň 5 znakov", "error", 5000);       
+                        } else { 
+                            if (self._heslo1.value === self._heslo2.value) {
+                                var self = this;
+                                var data = {
+                                    skupina: self._novaSkupina.value,
+                                    meno: self.currentUserName,
+                                    heslo: self._heslo1.value
+                                }
+                                fetch('/addGroup', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify(data),
+                                }).then(function(response) {
+                                    if (response.status >= 400) {
+                                        throw new Error("Bad response from server");
+                                    }
+                                    return response.json();
+                                }).then(function(data) {
+                                    self.getAllGroups();
+                                    self.getMojeSkupiny();
+                                }).catch(err => {
+                                    console.log('caught it!',err);
+                                })
+                            } else {
+                                notify.show("Zadané heslá novej skupiny sa nezhodujú", "error", 5000);
                             }
-                            return response.json();
-                        }).then(function(data) {
-                            self.getAllGroups();
-                            self.getMojeSkupiny();
-                        }).catch(err => {
-                            console.log('caught it!',err);
-                        })
+                        }
                     } else {
-                        notify.show("Zadané heslá novej skupiny sa nezhodujú", "error", 5000);
+                        notify.show("Skupina s týmto názvom už existuje", "error", 5000);
                     }
                 }
+                e.preventDefault();
             } else {
-                notify.show("Skupina s týmto názvom už existuje", "error", 5000);
+                notify.show("Názov ani heslo skupiny nesmie obsahovať špeciálny znak.", "error", 5000);
             }
-        }
-        e.preventDefault();
     }
 
     joinGroup(e){
         var self = this;
-        var data = {
-            skupina: document.getElementById("skupina").value,
-            meno: self.currentUserName,
-            heslo: self._heslo3.value,
-        }
-        console.log("join", data)
-        fetch('/joinGroup', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data),
-        }).then(function(response) {
-            if (response.status >= 400) {
-                throw new Error("Bad response from server");
+        if (!this.over(self._heslo3.value)){
+            notify.show("Bolo zadané zlé heslo skupiny.", "error", 5000);
+        } else{
+            var data = {
+                skupina: document.getElementById("skupina").value,
+                meno: self.currentUserName,
+                heslo: self._heslo3.value,
             }
-            return response.json();
-        }).then(function(data) {
-            self.getAllGroups();
-            self.getMojeSkupiny();
-        }).catch(err => {
-            console.log('caught it!',err);
-        })
-        e.preventDefault();
+            fetch('/joinGroup', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data),
+            }).then(function(response) {
+                if (response.status >= 400) {
+                    throw new Error("Bad response from server");
+                }
+                return response.json();
+            }).then(function(data) {
+                if (data.msg === "zleHeslo") {
+                    notify.show("Bolo zadané zlé heslo skupiny.", "error", 5000);
+                } else {
+                    self.getAllGroups();
+                    self.getMojeSkupiny();
+                }
+            }).catch(err => {
+                console.log('caught it!',err);
+            })
+            e.preventDefault();
+        }
     }
 
-    delete(skupina) {
+    deleteGroup(skupina){
         var self = this;
         var data = {
             skupina: skupina.nazov,
-            meno: self.currentUserName,
         }
-        console.log("unjoin", data)
-        fetch('/unjoinGroup', {
+        fetch('/deleteGroup', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data),
+        }).then(function(response) {
+            if (response.status >= 400) {
+                throw new Error("Bad response from server");
+            }
+            return response.json();
+        }).then(function(data) {
+                self.getAllGroups();
+                self.getMojeSkupiny();
+        }).catch(err => {
+            console.log('caught it!',err);
+        })
+    }
+
+    setOwner(user, skupina) {
+        var self = this;
+        var data = {
+            skupina: skupina.nazov,
+            meno: user, 
+        }
+        fetch('/changeOwner', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data),
@@ -140,9 +184,37 @@ class Skupiny extends Component {
         }).then(function(data) {
             self.getAllGroups();
             self.getMojeSkupiny();
+            self.change(skupina);
         }).catch(err => {
             console.log('caught it!',err);
         })
+    }
+
+    opusti(skupina) {
+        var self = this;
+        if (skupina.vlastnik === self.currentUserName) {
+            notify.show("Vlastník nemôže opustiť svoju skupinu", "error", 5000);
+        } else {
+            var data = {
+                skupina: skupina.nazov,
+                meno: self.currentUserName,
+            }
+            fetch('/unjoinGroup', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data),
+            }).then(function(response) {
+                if (response.status >= 400) {
+                    throw new Error("Bad response from server");
+                }
+                return response.json();
+            }).then(function(data) {
+                self.getAllGroups();
+                self.getMojeSkupiny();
+            }).catch(err => {
+                console.log('caught it!',err);
+            })
+        }
     }
 
     create(item) {
@@ -154,7 +226,7 @@ class Skupiny extends Component {
         } else {
             return (
                 <div key={item.nazov}>
-                    <SkupinaOutput skupina={item} meno={this.currentUserName} change={this.change} delete={() => this.delete(item)}/>
+                    <SkupinaOutput skupina={item} meno={this.currentUserName} change={this.change} setOwner={(m, s) => this.setOwner(m,s)} opusti={() => this.opusti(item)} deleteGroup={() => this.deleteGroup(item)}/>
                 </div>
             )
         }

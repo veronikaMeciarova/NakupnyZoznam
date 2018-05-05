@@ -1,9 +1,4 @@
 import React, { Component } from "react";
-import FlipMove from "react-flip-move";
-import {BootstrapTable, 
-    TableHeaderColumn} from 'react-bootstrap-table';
-import ZoznamOutput from "./ZoznamOutput"
-import ZoznamInput from "./ZoznamInput"
  
 class TvorbaZoznamov extends Component {
     constructor(props) {
@@ -40,7 +35,7 @@ class TvorbaZoznamov extends Component {
         this.createCheckboxObchod = this.createCheckboxObchod.bind(this);
     }
 
-    getOstatne(callback) {
+    getOstatne() {
         this.getObchody();
         this.getZoznamy();
         this.getSkupiny();
@@ -135,7 +130,6 @@ class TvorbaZoznamov extends Component {
         }).catch(err => {
             console.log('caught it!',err);
         })
-        console.log("kupil")
     }
 
     createTasks(item) {
@@ -209,8 +203,6 @@ class TvorbaZoznamov extends Component {
       setZoznamy(event) {
         var self = this;
         var index = self.state.nonCheckedZoznamy.indexOf(event.target.value);
-        console.log(self.state.nonCheckedZoznamy)
-        console.log(index);
         if (index === -1) {
             var newArray = this.state.nonCheckedZoznamy.concat(event.target.value);
         } else {
@@ -225,7 +217,7 @@ class TvorbaZoznamov extends Component {
         var self = this;
         return (
             <div>
-            <input type="checkbox" value={item} checked={self.state.nonCheckedObchody.indexOf(item) === -1} onChange={self.setObchody}/>  {self.state.obchod_nazov[item]}<br/>
+            <input type="checkbox" value={item} checked={self.state.nonCheckedObchody.indexOf(item.toString()) === -1} onChange={self.setObchody}/>  {self.state.obchod_nazov[item]}<br/>
             </div>
         )
       }

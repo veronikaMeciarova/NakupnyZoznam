@@ -8,13 +8,13 @@ import Registracia from "./Registracia"
 import Nakup from "./Nakup"
 import Skupiny from "./Skupiny"
 import ZmenaHesla from "./ZmenaHesla";
+import Reset from "./resetHesla"
   
-
-// window.sessionStorage.setItem("meno", "veronika")
 ReactDOM.render(   
     <div>
         <BrowserRouter>
             <div>
+                <Route path='/resetAdmin' render={(props) => <Navigacia {...props} id="0"/>} />
                 <Route path='/zmenaHesla' render={(props) => <Navigacia {...props} id="0"/>} />
                 <Route exact path='/nakup' render={(props) => <Navigacia {...props} id="1" />} />
                 <Route path='/tvorbaZoznamov' render={(props) => <Navigacia {...props} id="2" />} />
@@ -34,6 +34,7 @@ ReactDOM.render(
                 <Route exact path='/tvorbaZoznamov' render={(props) => <TvorbaZoznamov {...props} />} />
                 <Route path='/skupiny' render={(props) => <Skupiny {...props}/>} />
                 <Route path='/zmenaHesla' render={(props) => <ZmenaHesla {...props}/>} />
+                <Route path='/resetAdmin' render={(props) => <Reset {...props}/>} />
             </div>
         </BrowserRouter>,
     document.querySelector("#obsah")

@@ -13,17 +13,12 @@ class TvorbaZoznamov extends Component {
             open: []
         }
         this.currentUserName = window.sessionStorage.getItem("meno");
-        console.log("meno", this.currentUserName)
         this.getZoznamy();
         this.dajZoznam = this.getZoznamy.bind(this);
         this.change = this.change.bind(this);
         this.delete = this.delete.bind(this);
         this.create = this.create.bind(this);
     }
-
-    // setClose(item) {
-    //     item.open = false;
-    // }
 
     getZoznamy() {
         var self = this;
@@ -71,7 +66,6 @@ class TvorbaZoznamov extends Component {
     }
 
     delete(item) {
-        console.log("vymazavam", item);
         var self = this;
         var data = {
             id: item.id,

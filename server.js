@@ -27,7 +27,7 @@ con.query("SELECT * FROM pouzivatel", function (error, results, fields) {
 });
 
 app.post('/groups', function(req, res, next) {
-  var sql = 'SELECT nazov_skupina AS nazov FROM prislusnost WHERE meno_pouzivatel=?;'
+  var sql = 'SELECT s.vlastnik AS vlastnik, p.nazov_skupina AS nazov FROM prislusnost p, skupina s WHERE p.meno_pouzivatel=? AND s.nazov=p.nazov_skupina;'
   con.query(sql, [req.body.name], function (error, results, fields) {
       if(error) throw error;
       res.send(JSON.stringify(results));
@@ -51,7 +51,7 @@ app.post('/items', function(req, res, next) {
 });
 
 app.post('/itemDelete', function(req, res, next) {
-  var sql = 'DELETE FROM polozka WHERE id=?;'
+  var sql = 'UPDATE polozka SET platna="neplatna" WHERE id=?'
   con.query(sql, [req.body.id], function (error, results, fields) {
       if(error) throw error;
       res.send(JSON.stringify(results));
@@ -95,6 +95,29 @@ app.post('/chPasswd', function(req, res, next) {
       }     
   });
 });
+
+app.post('/chPasswdGroup', function(req, res, next) {
+  var sql = 'SELECT heslo, sol FROM skupina WHERE nazov=?;'
+  con.query(sql, [req.body.skupina], function (error, results, fields) {
+      if(error) throw error;
+      var staraSol = results[0].sol;
+      var stareHesloASol = req.body.stare + staraSol;
+      var staryHash = crypto.createHash('sha256').update(stareHesloASol).digest('base64');
+      if (staryHash === results[0].heslo) {
+        var novaSol = rand(160, 36);
+        var noveHesloASol = req.body.nove + novaSol;
+        var novyHash = crypto.createHash('sha256').update(noveHesloASol).digest('base64');
+        var sql = 'UPDATE skupina SET heslo=?, sol=? WHERE nazov=?;'
+        con.query(sql, [novyHash, novaSol, req.body.skupina], function (error, results, fields) {
+            if(error) throw error;
+            res.send(JSON.stringify(results));
+        });
+      } else {
+        res.send(JSON.stringify({msg: "zleHeslo"}));
+      }     
+  });
+});
+
 
 app.post('/addShop', function(req, res, next) {
   var sql = 'INSERT INTO obchod(nazov, nazov_skupina) VALUES (?,?);'
@@ -199,11 +222,11 @@ app.post('/setItemAsBought', function(req, res, next) {
       });
     }
 
-  var sql = 'SELECT pol.id AS id, z.nazov_skupina AS skupina, z.nazov AS zoznam, pol.nazov AS nazov, pol.kupena AS kupena, pol.obchod AS obchod, pol.meno_pouzivatel AS meno_pouzivatel, DATE_FORMAT(pol.deadline,"%d.%m.%Y") AS deadline, pol.platna AS platna, pol.poznamky AS poznamky FROM polozka pol, prislusnost pr, zoznam z WHERE pr.meno_pouzivatel=? AND pr.nazov_skupina=z.nazov_skupina AND z.id=pol.id_zoznam;'
-  con.query(sql, [req.body.meno], function (error, results, fields) {
-      if(error) throw error;
-      res.send(JSON.stringify(results));
-  });
+    var sql = 'SELECT o.nazov AS obchod_nazov, pol.id AS id, z.nazov_skupina AS skupina, z.nazov AS zoznam, pol.nazov AS nazov, pol.kupena AS kupena, pol.obchod AS obchod, pol.meno_pouzivatel AS meno_pouzivatel, DATE_FORMAT(pol.deadline,"%d.%m.%Y") AS deadline, pol.platna AS platna, pol.poznamky AS poznamky FROM polozka pol, prislusnost pr, zoznam z, obchod o WHERE pr.meno_pouzivatel=? AND pr.nazov_skupina=z.nazov_skupina AND z.id=pol.id_zoznam AND o.id=pol.obchod;'
+    con.query(sql, [req.body.meno], function (error, results, fields) {
+        if(error) throw error;
+        res.send(JSON.stringify(results));
+    });
 });
 
 app.post('/allGroups', function(req, res, next) {
@@ -238,11 +261,62 @@ app.post('/unjoinGroup', function(req, res, next) {
   });
 });
 
-app.post('/joinGroup', function(req, res, next) {
-  var sql = 'INSERT INTO prislusnost(meno_pouzivatel, nazov_skupina) VALUES (?,?);'
+app.post('/deleteGroup', function(req, res, next) {
+  var sql = 'DELETE FROM prislusnost WHERE nazov_skupina=?;'
+  con.query(sql, [req.body.skupina], function (error, results, fields) {
+      if(error) throw error;
+  });
+  var sql = 'DELETE FROM skupina WHERE nazov=?;'
+  con.query(sql, [req.body.skupina], function (error, results, fields) {
+      if(error) throw error;
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/changeOwner', function(req, res, next) {
+  var sql = 'UPDATE skupina SET vlastnik=? WHERE nazov=?;'
   con.query(sql, [req.body.meno, req.body.skupina], function (error, results, fields) {
       if(error) throw error;
       res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/allUsers', function(req, res, next) {
+  var sql = 'SELECT meno FROM pouzivatel;'
+  con.query(sql, [], function (error, results, fields) {
+      if(error) throw error;
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/resetPasswd', function(req, res, next) {
+  var sol = rand(160, 36);
+  var hesloASol = "heslo" + sol;
+  var hash = crypto.createHash('sha256').update(hesloASol).digest('base64');
+  var sql = 'UPDATE pouzivatel SET heslo=? , sol=? WHERE meno=?;'
+  con.query(sql, [hash, sol, req.body.meno], function (error, results, fields) {
+      if(error) throw error;
+      res.send(JSON.stringify(results));
+  });
+});
+
+app.post('/joinGroup', function(req, res, next) {
+  var sql = 'SELECT * FROM skupina WHERE nazov=?;'
+  con.query(sql, [req.body.skupina], function (error, results, fields) {
+    if(error) throw error; 
+    var self = this;
+    var sol = results[0].sol;
+    var hesloASol = req.body.heslo + sol;
+    var hash = crypto.createHash('sha256').update(hesloASol).digest('base64');
+      if (hash !== results[0].heslo) {
+        res.send(JSON.stringify({msg: "zleHeslo"}));
+      } else {
+        var sql = 'INSERT INTO prislusnost(meno_pouzivatel, nazov_skupina) VALUES (?,?);'
+        con.query(sql, [req.body.meno, req.body.skupina], function (error, results, fields) {
+            if(error) throw error;
+            res.send(JSON.stringify(results));
+        });
+      }
   });
 });
 

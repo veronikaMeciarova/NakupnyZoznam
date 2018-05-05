@@ -3,6 +3,8 @@ import Form from 'react-validation/build/form';
 import Input from 'react-validation/build/input';
 import Select from 'react-validation/build/select';
 import PropTypes from 'prop-types';
+import Notifications, {notify} from 'react-notify-toast';
+
 
 class ZoznamInput extends Component {
     constructor(props) {
@@ -38,11 +40,22 @@ class ZoznamInput extends Component {
         })
     }
 
+    over(text) {
+        if (/^[a-zA-Z]/.test(text)) {
+            return true;
+            } else {
+                return false;
+            }
+    }
+
     addItem(e) {
         var self = this;
+        if (!this.over(zoznamNazov)) {
+            notify.show("Názov zoznamu nesmie obsahovať špeciálne znaky.", "error", 5000);
+        }
         var zoznamNazov = this._inputElement.value;
         var skupinaNazov = document.getElementById("skupina").value;
-        if (zoznamNazov !== "" && skupinaNazov !== "none") {
+        if (zoznamNazov !== "" && skupinaNazov !== "none" && this.over(zoznamNazov)) {
             var data = {zoznam: zoznamNazov,
                         skupina: skupinaNazov
                         };
@@ -74,6 +87,7 @@ class ZoznamInput extends Component {
     render() {
         return (
             <div className="inputBlock">
+                <Notifications/>
                 <form onSubmit={this.addItem}>
                     <input  ref={(a) => this._inputElement = a}
                         placeholder="Názov zoznamu">

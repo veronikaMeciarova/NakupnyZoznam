@@ -3,7 +3,7 @@ const rand = require('csprng');
 const crypto = require('crypto');
 
 const app = express();
-app.use('/', express.static('client'));
+app.use('/', express.static('client/public'));
 var router = express.Router();
 const port = process.env.PORT || 5000;
 const bodyParser = require('body-parser');

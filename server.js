@@ -18,7 +18,7 @@ var con = mysql.createPool({
   database: process.env.clearDB_databaza
 });
 
-con.connect();
+//con.connect();
 
 con.query("SELECT * FROM pouzivatel", function (error, results, fields) {
   if (error) throw error;

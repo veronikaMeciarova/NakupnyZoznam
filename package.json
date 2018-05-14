@@ -18,5 +18,8 @@
   },
   "devDependencies": {
     "concurrently": "^3.5.0"
+  },
+  "scripts": {
+    "start": "cd client && npm start"
   }
 }

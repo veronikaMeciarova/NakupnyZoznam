@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 var mysql = require('mysql');
 const aws = require('aws-sdk');
 
-var con = mysql.createConnection({
+var con = mysql.createPool({
   host: process.env.clearDB_server,
   user: process.env.clearDB_meno,
   password: process.env.clearDB_heslo,
